@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Product Store</title>
+  <style>
+    :root { color-scheme: light; --ink:#172033; --muted:#667085; --line:#e4e7ec; --brand:#3157d5; --brand-dark:#2445b5; --surface:#fff; --bg:#f5f7fb; --danger:#b42318; --success:#067647; }
+    * { box-sizing:border-box; }
+    body { margin:0; font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; background:var(--bg); color:var(--ink); }
+    header { background:#111c3a; color:white; padding:24px clamp(18px,5vw,64px); }
+    .header-inner { max-width:1100px; margin:auto; display:flex; align-items:center; justify-content:space-between; gap:16px; }
+    .brand { display:flex; align-items:center; gap:12px; }
+    .logo { width:42px; height:42px; display:grid; place-items:center; background:#dce6ff; color:#1d3e9e; border-radius:12px; font-weight:800; font-size:20px; }
+    h1 { font-size:clamp(22px,3vw,30px); margin:0; letter-spacing:-.6px; }
+    header p { margin:5px 0 0; color:#c8d2ee; font-size:14px; }
+    .live { font-size:12px; border:1px solid #52618b; border-radius:999px; padding:7px 11px; white-space:nowrap; }
+    main { max-width:1100px; margin:30px auto; padding:0 18px 40px; display:grid; grid-template-columns:minmax(260px,340px) minmax(0,1fr); gap:22px; align-items:start; }
+    .card { background:var(--surface); border:1px solid var(--line); border-radius:16px; padding:22px; box-shadow:0 4px 16px rgba(16,24,40,.035); }
+    .card h2 { margin:0 0 6px; font-size:18px; letter-spacing:-.3px; }
+    .sub { margin:0 0 20px; color:var(--muted); font-size:13px; line-height:1.5; }
+    label { display:block; font-size:13px; font-weight:650; margin:14px 0 7px; }
+    input, textarea { width:100%; border:1px solid #d0d5dd; border-radius:9px; padding:11px 12px; font:inherit; font-size:14px; color:var(--ink); background:#fff; outline:none; }
+    input:focus, textarea:focus { border-color:var(--brand); box-shadow:0 0 0 3px rgba(49,87,213,.12); }
+    textarea { min-height:84px; resize:vertical; }
+    .two { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+    button { border:0; border-radius:9px; padding:11px 15px; background:var(--brand); color:white; font-weight:700; font-size:14px; cursor:pointer; }
+    button:hover { background:var(--brand-dark); }
+    button:disabled { opacity:.6; cursor:wait; }
+    .submit { width:100%; margin-top:20px; }
+    .message { margin-top:14px; font-size:13px; line-height:1.45; }
+    .message.error { color:var(--danger); } .message.success { color:var(--success); }
+    .list-head { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:18px; }
+    .list-head h2 { margin:0 0 4px; }
+    .count { font-size:12px; color:#344054; background:#f2f4f7; border-radius:999px; padding:6px 10px; white-space:nowrap; }
+    .table-wrap { overflow-x:auto; }
+    table { width:100%; border-collapse:collapse; text-align:left; font-size:13px; }
+    th { color:#667085; font-size:11px; text-transform:uppercase; letter-spacing:.05em; font-weight:700; background:#f9fafb; }
+    th, td { padding:13px 12px; border-bottom:1px solid #eaecf0; }
+    tbody tr:last-child td { border-bottom:0; }
+    td.name { font-weight:700; color:#1d2939; min-width:130px; }
+    td.desc { color:#667085; min-width:160px; max-width:250px; }
+    td.money, td.qty { white-space:nowrap; font-variant-numeric:tabular-nums; }
+    .empty { padding:35px 12px; text-align:center; color:var(--muted); }
+    .empty strong { display:block; color:var(--ink); margin-bottom:6px; }
+    .footnote { color:#98a2b3; font-size:12px; margin:16px 0 0; }
+    @media(max-width:800px) { main { grid-template-columns:1fr; margin-top:20px; } }
+    @media(max-width:480px) { .live { display:none; } .card { padding:17px; } th,td { padding:11px 9px; } }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-inner">
+      <div class="brand">
+        <div class="logo" aria-hidden="true">P</div>
+        <div><h1>Product Store</h1><p>Manage your inventory in one place</p></div>
+      </div>
+      <div class="live">● Live database-backed inventory</div>
+    </div>
+  </header>
+  <main>
+    <section class="card">
+      <h2>Add a product</h2>
+      <p class="sub">Submit a product to save it in the MySQL database.</p>
+      <form id="product-form">
+        <label for="name">Product name *</label>
+        <input id="name" name="name" maxlength="120" required placeholder="e.g. Wireless Mouse">
+        <label for="description">Description</label>
+        <textarea id="description" name="description" maxlength="1000" placeholder="Short product description"></textarea>
+        <div class="two">
+          <div><label for="price">Price (₹) *</label><input id="price" name="price" type="number" min="0.01" step="0.01" required placeholder="499.00"></div>
+          <div><label for="quantity">Quantity *</label><input id="quantity" name="quantity" type="number" min="0" step="1" required value="1"></div>
+        </div>
+        <button class="submit" id="submit-button" type="submit">Add product</button>
+        <div class="message" id="form-message" role="status" aria-live="polite"></div>
+      </form>
+    </section>
+    <section class="card">
+      <div class="list-head">
+        <div><h2>Product inventory</h2><p class="sub" style="margin:5px 0 0">Products loaded from your database</p></div>
+        <span class="count" id="product-count">Loading…</span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Product</th><th>Price</th><th>Qty</th></tr></thead>
+          <tbody id="product-list"><tr><td colspan="3" class="empty">Loading products…</td></tr></tbody>
+        </table>
+      </div>
+      <p class="footnote">Inventory refreshes after each successful save.</p>
+      <div class="message error" id="list-message" role="status" aria-live="polite"></div>
+    </section>
+  </main>
+  <script>
+    const form = document.getElementById('product-form');
+    const submitButton = document.getElementById('submit-button');
+    const formMessage = document.getElementById('form-message');
+    const listMessage = document.getElementById('list-message');
+    const productList = document.getElementById('product-list');
+    const productCount = document.getElementById('product-count');
+
+    function showMessage(element, text, type) {
+      element.textContent = text;
+      element.className = 'message' + (type ? ' ' + type : '');
+    }
+
+    function cell(tag, className, text) {
+      const el = document.createElement(tag);
+      if (className) el.className = className;
+      el.textContent = text == null || text === '' ? '—' : String(text);
+      return el;
+    }
+
+    async function loadProducts() {
+      listMessage.textContent = '';
+      try {
+        const response = await fetch('/api/products', { headers: { 'Accept': 'application/json' } });
+        if (!response.ok) throw new Error('Could not load products (HTTP ' + response.status + ').');
+        const products = await response.json();
+        productCount.textContent = products.length + (products.length === 1 ? ' product' : ' products');
+        productList.replaceChildren();
+        if (!products.length) {
+          const row = document.createElement('tr');
+          const empty = cell('td', 'empty', '');
+          empty.colSpan = 3;
+          empty.innerHTML = '<strong>No products yet</strong>Add your first product using the form.';
+          row.appendChild(empty);
+          productList.appendChild(row);
+          return;
+        }
+        products.forEach(product => {
+          const row = document.createElement('tr');
+          const nameCell = document.createElement('td');
+          nameCell.className = 'name';
+          nameCell.textContent = product.name || 'Unnamed product';
+          if (product.description) {
+            const desc = document.createElement('div');
+            desc.className = 'desc';
+            desc.textContent = product.description;
+            desc.style.fontWeight = '400';
+            desc.style.marginTop = '4px';
+            nameCell.appendChild(desc);
+          }
+          row.appendChild(nameCell);
+          row.appendChild(cell('td', 'money', '₹' + Number(product.price).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })));
+          row.appendChild(cell('td', 'qty', product.quantity));
+          productList.appendChild(row);
+        });
+      } catch (error) {
+        productCount.textContent = 'Unavailable';
+        productList.replaceChildren();
+        const row = document.createElement('tr');
+        const empty = cell('td', 'empty', 'Unable to load inventory. Refresh the page to try again.');
+        empty.colSpan = 3;
+        row.appendChild(empty);
+        productList.appendChild(row);
+        showMessage(listMessage, error.message || 'Could not connect to the product API.', 'error');
+      }
+    }
+
+    form.addEventListener('submit', async event => {
+      event.preventDefault();
+      showMessage(formMessage, '', '');
+      submitButton.disabled = true;
+      submitButton.textContent = 'Saving…';
+      const payload = {
+        name: form.name.value.trim(),
+        description: form.description.value.trim(),
+        price: Number(form.price.value),
+        quantity: Number(form.quantity.value)
+      };
+      try {
+        const response = await fetch('/api/products', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        if (!response.ok) {
+          let detail = 'HTTP ' + response.status;
+          try { const body = await response.json(); if (body.message) detail = body.message; } catch (_) {}
+          throw new Error('Product was not saved. ' + detail);
+        }
+        const saved = await response.json();
+        form.reset();
+        showMessage(formMessage, 'Saved "' + saved.name + '" (ID ' + saved.id + ') to the database.', 'success');
+        document.getElementById('quantity').value = '1';
+        await loadProducts();
+      } catch (error) {
+        showMessage(formMessage, error.message || 'Could not save product. Check the application logs.', 'error');
+      } finally {
+        submitButton.disabled = false;
+        submitButton.textContent = 'Add product';
+      }
+    });
+
+    loadProducts();
+  </script>
+</body>
+</html>
