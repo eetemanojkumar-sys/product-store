@@ -8,4 +8,3 @@ variable "instance_type" { type = string }
 variable "dynamodb_table_arn" { type = string }
 variable "dynamodb_table_name" { type = string }
 variable "dynamodb_users_table_arn" { type = string }
-variable "dynamodb_users_table_name" { type = string }
