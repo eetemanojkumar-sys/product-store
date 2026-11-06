@@ -5,3 +5,5 @@ variable "admin_cidr" { type = string }
 variable "app_ingress_cidr" { type = string }
 variable "key_name" { type = string }
 variable "instance_type" { type = string }
+variable "dynamodb_table_arn" { type = string }
+variable "dynamodb_table_name" { type = string }
