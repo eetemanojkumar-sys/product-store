@@ -10,10 +10,10 @@ module "vpc" {
 }
 
 module "dynamodb" {
-  source             = "./modules/dynamodb"
-  project_name       = var.project_name
-  table_name         = var.dynamodb_table_name
-  point_in_time_recovery = var.dynamodb_point_in_time_recovery
+  source                  = "./modules/dynamodb"
+  project_name            = var.project_name
+  table_name              = var.dynamodb_table_name
+  point_in_time_recovery  = var.dynamodb_point_in_time_recovery
 }
 
 module "ec2" {
