@@ -127,7 +127,6 @@ resource "aws_instance" "app" {
               cat >/etc/profile.d/product-store-dynamodb.sh <<'PROFILE'
               export AWS_REGION="${data.aws_region.current.name}"
               export DYNAMODB_TABLE="${var.dynamodb_table_name}"
-              export DYNAMODB_USERS_TABLE="${var.dynamodb_users_table_name}"
               PROFILE
               EOF
 
