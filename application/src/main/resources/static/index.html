@@ -196,7 +196,7 @@
         }
         const saved = await response.json();
         form.reset();
-        showMessage(formMessage, 'Saved "' + saved.name + '" (ID ' + saved.id + ') to the database.', 'success');
+        showMessage(formMessage, 'Saved "' + saved.name + '" (ID ' + saved.productId + ') to DynamoDB.', 'success');
         document.getElementById('quantity').value = '1';
         await loadProducts();
       } catch (error) {
