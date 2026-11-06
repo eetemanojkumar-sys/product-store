@@ -1,29 +1,29 @@
 # Product Store — Terraform Infrastructure
 
-Terraform provisions a dedicated AWS VPC, one Ubuntu EC2 application server, and a private Amazon RDS for MySQL database. The Java application is deployed manually after infrastructure creation. No load balancer is included.
+Terraform provisions an AWS VPC, an Ubuntu EC2 application server, and an on-demand Amazon DynamoDB table. The Spring Boot application can access DynamoDB through an EC2 instance profile; no database password or static AWS access key is stored in Terraform variables.
 
 ## Architecture
-- Public subnet: Ubuntu EC2 application server (port 8080 for testing)
-- Private subnets in two Availability Zones: RDS subnet group
-- Security group: SSH restricted to `admin_cidr`; app port 8080 restricted to `app_ingress_cidr`
-- RDS security group: MySQL 3306 only from the EC2 application security group
-- RDS: private, not publicly accessible
-- Terraform state: local by default. Configure remote state separately after creating an S3 bucket and (optionally) a lock table.
+
+- Public subnet: Ubuntu EC2 application server (port 8080 restricted to `app_ingress_cidr`)
+- DynamoDB: on-demand table `products` with string partition key `productId`, point-in-time recovery enabled
+- EC2 instance profile: least-privilege DynamoDB item access to the Product Store table
+- EC2 metadata service: IMDSv2 required
+- Terraform state: local by default; configure remote state separately for team use
 
 ## Prerequisites
+
 - Terraform >= 1.6
-- AWS CLI configured with an identity allowed to create VPC, EC2, IAM, and RDS resources
+- AWS CLI configured with an identity allowed to create VPC, EC2, IAM, and DynamoDB resources
 - An EC2 key pair already created in the selected region
-- A known public IP/CIDR for SSH and app access
+- A known public IP/CIDR for SSH and application access
 
 ## Usage
+
 1. Copy `terraform.tfvars.example` to `terraform.tfvars`.
-2. Set `admin_cidr` and `app_ingress_cidr` to your public IP with `/32`, e.g. `203.0.113.10/32`.
+2. Set `admin_cidr` and `app_ingress_cidr` to your public IP with `/32`.
 3. Set `key_name` to an existing EC2 key pair in the selected region.
-4. Set a strong DB password through an environment variable instead of writing it into a tracked file:
-   - Bash: `export TF_VAR_db_password='your-strong-password'`
-   - PowerShell: `$env:TF_VAR_db_password = 'your-strong-password'`
-5. Run:
+4. Run:
+
    ```bash
    terraform init
    terraform fmt -recursive
@@ -31,15 +31,18 @@ Terraform provisions a dedicated AWS VPC, one Ubuntu EC2 application server, and
    terraform plan
    terraform apply
    ```
-6. Retrieve outputs:
-   ```bash
-   terraform output
-   ```
-7. Connect to EC2 and manually install Java/deploy the application. Configure Spring Boot with the RDS endpoint, database `productstore`, username and password using environment variables.
 
-## Important notes
-- RDS and EC2 incur charges while running. Review AWS pricing before `apply`.
-- The DB password is sensitive in Terraform output, but Terraform state can still contain it. Protect state and never commit state files.
-- For production, prefer Systems Manager Session Manager instead of public SSH, HTTPS instead of exposing HTTP directly, Secrets Manager for credentials, and tighter IAM policies.
-- This project deliberately has no load balancer and does not deploy application code.
-- Do not run `terraform destroy` unless you intend to delete the resources. RDS deletion protection is enabled by default.
+5. Retrieve outputs with `terraform output`.
+6. Deploy the application to EC2 and configure `AWS_REGION` and `DYNAMODB_TABLE`. The EC2 role supplies credentials automatically through the AWS SDK default credential chain.
+
+## Important migration note
+
+This branch replaces the old RDS Terraform module with DynamoDB. Applying it against an existing Terraform state can plan to destroy the RDS instance and its database. Back up and export any data first, inspect `terraform plan` carefully, and do not apply a plan that destroys a database you still need. Terraform does not automatically migrate SQL rows into DynamoDB.
+
+## Cost and security
+
+- DynamoDB uses on-demand billing and point-in-time recovery. Review current AWS pricing for your workload.
+- EC2 access is scoped by security group CIDRs. Restrict SSH and HTTP ingress to trusted addresses.
+- The app role grants only item operations on this table plus Scan. Do not attach broad DynamoDB permissions.
+- Use HTTPS through a load balancer or reverse proxy for production.
+- Protect Terraform state and never commit state files or credentials.

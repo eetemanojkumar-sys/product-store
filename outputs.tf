@@ -13,14 +13,19 @@ output "application_url" {
   value       = "http://${module.ec2.public_ip}:8080"
 }
 
-output "rds_endpoint" {
-  description = "RDS endpoint hostname and port."
-  value       = module.rds.endpoint
+output "dynamodb_table_name" {
+  description = "DynamoDB table name used by the application."
+  value       = module.dynamodb.table_name
 }
 
-output "rds_database_name" {
-  description = "Initial MySQL database name."
-  value       = var.db_name
+output "dynamodb_table_arn" {
+  description = "DynamoDB table ARN."
+  value       = module.dynamodb.table_arn
+}
+
+output "ec2_instance_role_name" {
+  description = "IAM role assumed by EC2 for DynamoDB access."
+  value       = module.ec2.instance_role_name
 }
 
 output "vpc_id" {
