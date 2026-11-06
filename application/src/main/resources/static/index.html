@@ -15,6 +15,8 @@
     h1 { font-size:clamp(22px,3vw,30px); margin:0; letter-spacing:-.6px; }
     header p { margin:5px 0 0; color:#c8d2ee; font-size:14px; }
     .live { font-size:12px; border:1px solid #52618b; border-radius:999px; padding:7px 11px; white-space:nowrap; }
+    .header-actions { display:flex; align-items:center; gap:10px; }
+    .header-actions button { background:#52618b; padding:8px 12px; }
     main { max-width:1100px; margin:30px auto; padding:0 18px 40px; display:grid; grid-template-columns:minmax(260px,340px) minmax(0,1fr); gap:22px; align-items:start; }
     .card { background:var(--surface); border:1px solid var(--line); border-radius:16px; padding:22px; box-shadow:0 4px 16px rgba(16,24,40,.035); }
     .card h2 { margin:0 0 6px; font-size:18px; letter-spacing:-.3px; }
@@ -55,13 +57,13 @@
         <div class="logo" aria-hidden="true">P</div>
         <div><h1>Product Store</h1><p>Manage your inventory in one place</p></div>
       </div>
-      <div class="live">● Live database-backed inventory</div>
+      <div class="header-actions"><span class="live" id="current-user">Signed in</span><button id="logout-button" type="button">Logout</button></div>
     </div>
   </header>
   <main>
     <section class="card">
       <h2>Add a product</h2>
-      <p class="sub">Submit a product to save it in the MySQL database.</p>
+      <p class="sub">Submit a product to save it in DynamoDB.</p>
       <form id="product-form">
         <label for="name">Product name *</label>
         <input id="name" name="name" maxlength="120" required placeholder="e.g. Wireless Mouse">
@@ -97,6 +99,19 @@
     const listMessage = document.getElementById('list-message');
     const productList = document.getElementById('product-list');
     const productCount = document.getElementById('product-count');
+
+    async function checkSession() {
+      const response = await fetch('/api/auth/me', { headers: { 'Accept': 'application/json' } });
+      if (!response.ok) { location.href = '/login.html'; return false; }
+      const user = await response.json();
+      document.getElementById('current-user').textContent = user.name + ' · ' + user.role;
+      return true;
+    }
+
+    document.getElementById('logout-button').addEventListener('click', async () => {
+      await fetch('/api/auth/logout', { method: 'POST' });
+      location.href = '/login.html';
+    });
 
     function showMessage(element, text, type) {
       element.textContent = text;
@@ -181,7 +196,7 @@
         }
         const saved = await response.json();
         form.reset();
-        showMessage(formMessage, 'Saved "' + saved.name + '" (ID ' + saved.id + ') to the database.', 'success');
+        showMessage(formMessage, 'Saved "' + saved.name + '" (ID ' + saved.productId + ') to DynamoDB.', 'success');
         document.getElementById('quantity').value = '1';
         await loadProducts();
       } catch (error) {
@@ -192,7 +207,7 @@
       }
     });
 
-    loadProducts();
+    checkSession().then(authenticated => { if (authenticated) loadProducts(); });
   </script>
 </body>
 </html>
