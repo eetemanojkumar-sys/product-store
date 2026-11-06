@@ -13,6 +13,7 @@ module "dynamodb" {
   source                  = "./modules/dynamodb"
   project_name            = var.project_name
   table_name              = var.dynamodb_table_name
+  users_table_name        = var.dynamodb_users_table_name
   point_in_time_recovery  = var.dynamodb_point_in_time_recovery
 }
 
@@ -27,4 +28,6 @@ module "ec2" {
   instance_type       = var.instance_type
   dynamodb_table_arn  = module.dynamodb.table_arn
   dynamodb_table_name = module.dynamodb.table_name
+  dynamodb_users_table_arn = module.dynamodb.users_table_arn
+  dynamodb_users_table_name = module.dynamodb.users_table_name
 }
