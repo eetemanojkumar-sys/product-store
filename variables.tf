@@ -23,7 +23,7 @@ variable "vpc_cidr" {
 }
 
 variable "admin_cidr" {
-  description = "Your public IP/CIDR allowed to SSH to EC2, e.g. 203.0.113.10/32."
+  description = "Public IPv4 CIDR allowed to SSH to EC2, e.g. 203.0.113.10/32."
   type        = string
   validation {
     condition     = can(cidrnetmask(var.admin_cidr))
@@ -32,7 +32,7 @@ variable "admin_cidr" {
 }
 
 variable "app_ingress_cidr" {
-  description = "Public IP/CIDR allowed to access the app on port 8080. Use your IP/32."
+  description = "Public IPv4 CIDR allowed to access the app on port 8080."
   type        = string
   validation {
     condition     = can(cidrnetmask(var.app_ingress_cidr))
@@ -51,37 +51,14 @@ variable "instance_type" {
   default     = "t3.micro"
 }
 
-variable "db_instance_class" {
-  description = "RDS instance class."
+variable "dynamodb_table_name" {
+  description = "DynamoDB table used by the Product Store application."
   type        = string
-  default     = "db.t3.micro"
+  default     = "products"
 }
 
-variable "db_name" {
-  description = "Initial MySQL database name."
-  type        = string
-  default     = "productstore"
-}
-
-variable "db_username" {
-  description = "RDS master username. For production, create a separate least-privilege app user."
-  type        = string
-  default     = "productadmin"
-}
-
-variable "db_password" {
-  description = "RDS master password. Set with TF_VAR_db_password environment variable."
-  type        = string
-  sensitive   = true
-  nullable    = false
-  validation {
-    condition     = length(var.db_password) >= 12 && length(var.db_password) <= 41
-    error_message = "db_password must be between 12 and 41 characters."
-  }
-}
-
-variable "db_allocated_storage" {
-  description = "Initial RDS allocated storage in GiB."
-  type        = number
-  default     = 20
+variable "dynamodb_point_in_time_recovery" {
+  description = "Enable point-in-time recovery for the DynamoDB table."
+  type        = bool
+  default     = true
 }
