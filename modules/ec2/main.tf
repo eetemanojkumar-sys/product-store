@@ -49,7 +49,7 @@ resource "aws_security_group" "app" {
 
 data "aws_iam_policy_document" "ec2_assume_role" {
   statement {
-    effect = "Allow"
+    effect  = "Allow"
     actions = ["sts:AssumeRole"]
     principals {
       type        = "Service"
@@ -78,7 +78,10 @@ resource "aws_iam_role_policy" "dynamodb" {
         "dynamodb:DeleteItem",
         "dynamodb:Scan"
       ]
-      Resource = var.dynamodb_table_arn
+      Resource = [
+        var.dynamodb_table_arn,
+        "${var.dynamodb_table_arn}/index/*"
+      ]
     }]
   })
 }
