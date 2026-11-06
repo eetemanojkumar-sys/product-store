@@ -1,12 +1,12 @@
 # Product Store — Terraform Infrastructure
 
-Terraform provisions an AWS VPC, an Ubuntu EC2 application server, and an on-demand Amazon DynamoDB table. The Spring Boot application can access DynamoDB through an EC2 instance profile; no database password or static AWS access key is stored in Terraform variables.
+Terraform provisions an AWS VPC, an Ubuntu EC2 application server, and an on-demand Amazon DynamoDB table. The Spring Boot application accesses DynamoDB through an EC2 instance profile; no database password or static AWS access key is stored in Terraform variables.
 
 ## Architecture
 
 - Public subnet: Ubuntu EC2 application server (port 8080 restricted to `app_ingress_cidr`)
-- DynamoDB: on-demand table `products` with string partition key `productId`, point-in-time recovery enabled
-- EC2 instance profile: least-privilege DynamoDB item access to the Product Store table
+- DynamoDB: on-demand table `products` with string partition key `productId`, encryption and point-in-time recovery
+- EC2 instance profile: least-privilege DynamoDB access to the Product Store table
 - EC2 metadata service: IMDSv2 required
 - Terraform state: local by default; configure remote state separately for team use
 
@@ -37,12 +37,12 @@ Terraform provisions an AWS VPC, an Ubuntu EC2 application server, and an on-dem
 
 ## Important migration note
 
-This branch replaces the old RDS Terraform module with DynamoDB. Applying it against an existing Terraform state can plan to destroy the RDS instance and its database. Back up and export any data first, inspect `terraform plan` carefully, and do not apply a plan that destroys a database you still need. Terraform does not automatically migrate SQL rows into DynamoDB.
+This branch replaces the old RDS Terraform module with DynamoDB. Applying it against an existing Terraform state can plan to destroy the RDS instance and its database. Export and back up existing SQL data first, inspect `terraform plan` carefully, and do not apply a plan that destroys a database you still need. Terraform does not automatically migrate SQL rows into DynamoDB. The current branch contains no SQL-to-DynamoDB data import utility.
 
 ## Cost and security
 
 - DynamoDB uses on-demand billing and point-in-time recovery. Review current AWS pricing for your workload.
 - EC2 access is scoped by security group CIDRs. Restrict SSH and HTTP ingress to trusted addresses.
-- The app role grants only item operations on this table plus Scan. Do not attach broad DynamoDB permissions.
+- The app role grants item operations and Scan only on the Product Store table.
 - Use HTTPS through a load balancer or reverse proxy for production.
 - Protect Terraform state and never commit state files or credentials.
