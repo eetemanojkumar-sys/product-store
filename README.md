@@ -46,3 +46,52 @@ This branch replaces the old RDS Terraform module with DynamoDB. Applying it aga
 - The app role grants only item operations on this table plus Scan. Do not attach broad DynamoDB permissions.
 - Use HTTPS through a load balancer or reverse proxy for production.
 - Protect Terraform state and never commit state files or credentials.
+
+
+## Container deployment
+
+The Spring Boot application is containerized from the `application/` directory. It listens on `0.0.0.0:8080` inside the container and uses the AWS SDK default credential chain. On EC2, attach the Terraform-created instance profile; do not pass AWS access keys into the container.
+
+### Build and run locally
+
+From the repository root:
+
+```bash
+docker build -t product-store:local ./application
+docker run --rm -p 8080:8080 \
+  -e AWS_REGION=ap-south-1 \
+  -e DYNAMODB_TABLE=products \
+  product-store:local
+```
+
+The host must have AWS credentials configured (or use an attached EC2 instance role). The role needs the DynamoDB item permissions documented above.
+
+### Publish to a registry
+
+For example, with Docker Hub:
+
+```bash
+docker login
+docker build -t YOUR_DOCKERHUB_USERNAME/product-store:latest ./application
+docker push YOUR_DOCKERHUB_USERNAME/product-store:latest
+```
+
+Set `docker_image` in `terraform.tfvars` to that exact image reference. The EC2 user-data script pulls and runs it on port 8080.
+
+### Allow public internet access
+
+Set `app_ingress_cidr = "0.0.0.0/0"` in `terraform.tfvars` to make TCP/8080 reachable from the internet. Keep `admin_cidr` restricted to your own public IP (/32); SSH is not opened publicly by this setting.
+
+Then run:
+
+```bash
+terraform init
+terraform validate
+terraform plan
+terraform apply
+terraform output application_url
+```
+
+Also confirm the EC2 subnet has a route to an Internet Gateway and the instance has a public IPv4 address. The current VPC module provides both. This exposes plain HTTP; use a domain and HTTPS reverse proxy or load balancer before production use.
+
+**Important:** Terraform user-data runs when an instance is first created (or when the instance is replaced under the applicable lifecycle behavior). Changing the image variable alone may not automatically restart an already-running container; deploy a new image explicitly or replace/reprovision the instance after reviewing `terraform plan`.
