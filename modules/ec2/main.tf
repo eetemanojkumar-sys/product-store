@@ -117,21 +117,18 @@ resource "aws_instance" "app" {
 
   user_data = <<-EOF
               #!/bin/bash
-              # Install Docker and deploy the application image.
+              set -euxo pipefail
+              exec > >(tee -a /var/log/product-store-bootstrap.log) 2>&1
               apt-get update
               apt-get install -y docker.io
-              # Send cloud-init output to the instance console for troubleshooting.
-              exec > >(tee -a /var/log/product-store-bootstrap.log) 2>&1
-              set -eux
               systemctl enable --now docker
-              usermod -aG docker ubuntu
               docker pull ${var.docker_image}
+              docker rm -f product-store || true
               docker run -d --name product-store --restart unless-stopped \
                 -p 80:8080 -p 8080:8080 \
                 -e AWS_REGION="${data.aws_region.current.name}" \
                 -e DYNAMODB_TABLE="${var.dynamodb_table_name}" \
                 ${var.docker_image}
               EOF
-
   tags = { Name = "${var.project_name}-app" }
 }
