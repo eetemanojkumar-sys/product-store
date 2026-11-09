@@ -42,3 +42,7 @@ The AWS identity must have `dynamodb:GetItem`, `dynamodb:PutItem`, `dynamodb:Del
 ```
 
 DynamoDB stores each product with a string `productId` partition key. List operations use Scan and are appropriate for this small demonstration application; use a Query-based access pattern and pagination for larger datasets.
+
+## Docker
+
+Build from the repository root with `docker build -t product-store:local ./application`. Run with `docker run --rm -p 8080:8080 -e AWS_REGION=ap-south-1 -e DYNAMODB_TABLE=products product-store:local`. The container uses the AWS SDK default credential chain; use an IAM role on EC2 or securely configured credentials in other environments. Do not bake AWS credentials into the image.

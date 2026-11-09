@@ -27,4 +27,5 @@ module "ec2" {
   instance_type       = var.instance_type
   dynamodb_table_arn  = module.dynamodb.table_arn
   dynamodb_table_name = module.dynamodb.table_name
+  docker_image        = var.docker_image
 }

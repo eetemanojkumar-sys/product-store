@@ -5,7 +5,7 @@ vpc_cidr        = "10.20.0.0/16"
 
 # Replace with your current public IPv4 address in /32 CIDR format.
 admin_cidr       = "203.0.113.10/32"
-app_ingress_cidr = "203.0.113.10/32"
+app_ingress_cidr = "0.0.0.0/0" # Public HTTP access on TCP/80 and TCP/8080
 
 # Must already exist as an EC2 key pair in ap-south-1.
 key_name = "replace-with-existing-keypair-name"
@@ -13,3 +13,6 @@ key_name = "replace-with-existing-keypair-name"
 instance_type                   = "t3.micro"
 dynamodb_table_name             = "products"
 dynamodb_point_in_time_recovery = true
+
+# Published image; override with your Docker Hub or GHCR image.
+docker_image = "YOUR_DOCKERHUB_USERNAME/product-store:latest"
