@@ -112,6 +112,9 @@ resource "aws_instance" "app" {
               # Install Docker and deploy the application image.
               apt-get update
               apt-get install -y docker.io
+              # Send cloud-init output to the instance console for troubleshooting.
+              exec > >(tee -a /var/log/product-store-bootstrap.log) 2>&1
+              set -eux
               systemctl enable --now docker
               usermod -aG docker ubuntu
               docker pull ${var.docker_image}
