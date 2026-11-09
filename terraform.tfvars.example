@@ -15,4 +15,4 @@ dynamodb_table_name             = "products"
 dynamodb_point_in_time_recovery = true
 
 # Published image; override with your Docker Hub or GHCR image.
-docker_image = "ghcr.io/eetemanojkumar-sys/product-store:latest"
+docker_image = "YOUR_DOCKERHUB_USERNAME/product-store:latest"
