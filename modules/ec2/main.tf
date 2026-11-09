@@ -113,6 +113,7 @@ resource "aws_instance" "app" {
               apt-get update
               apt-get install -y docker.io
               systemctl enable --now docker
+              usermod -aG docker ubuntu
               docker pull ${var.docker_image}
               docker run -d --name product-store --restart unless-stopped \
                 -p 8080:8080 \
