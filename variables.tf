@@ -32,7 +32,7 @@ variable "admin_cidr" {
 }
 
 variable "app_ingress_cidr" {
-  description = "CIDR allowed to access the app on port 8080; use 0.0.0.0/0 for public internet access."
+  description = "CIDR allowed to access the app on ports 80 and 8080; use 0.0.0.0/0 for public internet access."
   type        = string
   validation {
     condition     = can(cidrnetmask(var.app_ingress_cidr))
