@@ -95,3 +95,27 @@ terraform output application_url
 Also confirm the EC2 subnet has a route to an Internet Gateway and the instance has a public IPv4 address. The current VPC module provides both. This exposes plain HTTP; use a domain and HTTPS reverse proxy or load balancer before production use.
 
 **Important:** Terraform user-data runs when an instance is first created (or when the instance is replaced under the applicable lifecycle behavior). Changing the image variable alone may not automatically restart an already-running container; deploy a new image explicitly or replace/reprovision the instance after reviewing `terraform plan`.
+
+
+### Build and publish the image before applying Terraform
+
+The EC2 bootstrap pulls the image configured in `docker_image`. A practical public-image workflow is:
+
+```bash
+cd application
+docker build -t YOUR_DOCKERHUB_USERNAME/product-store:latest .
+docker login
+docker push YOUR_DOCKERHUB_USERNAME/product-store:latest
+cd ..
+```
+
+Set `docker_image` in `terraform.tfvars` to `YOUR_DOCKERHUB_USERNAME/product-store:latest` before `terraform apply`. If using GHCR or a private registry, configure an image-pull authentication mechanism on EC2; the sample bootstrap assumes the image is publicly pullable.
+
+To test the app after deployment, run:
+
+```bash
+curl -i http://$(terraform output -raw ec2_public_ip)/api/products
+curl -i http://$(terraform output -raw ec2_public_ip):8080/api/products
+```
+
+The API requires a reachable DynamoDB table and an EC2 instance profile with the documented item permissions. Public access is plain HTTP and is suitable for a learning/demo deployment, not production without HTTPS and tighter ingress controls.
