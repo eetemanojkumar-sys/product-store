@@ -15,7 +15,7 @@ data "aws_ami" "ubuntu" {
 
 resource "aws_security_group" "app" {
   name        = "${var.project_name}-app-sg"
-  description = "Allow admin SSH and restricted Product Store web access"
+  description = "Allow admin SSH and configurable Product Store web access"
   vpc_id      = var.vpc_id
 
   ingress {
@@ -27,7 +27,7 @@ resource "aws_security_group" "app" {
   }
 
   ingress {
-    description = "Spring Boot application from allowed client IP only"
+    description = "HTTP access to the Product Store application"
     from_port   = 8080
     to_port     = 8080
     protocol    = "tcp"
@@ -109,10 +109,16 @@ resource "aws_instance" "app" {
 
   user_data = <<-EOF
               #!/bin/bash
-              cat >/etc/profile.d/product-store-dynamodb.sh <<'PROFILE'
-              export AWS_REGION="${data.aws_region.current.name}"
-              export DYNAMODB_TABLE="${var.dynamodb_table_name}"
-              PROFILE
+              # Install Docker and deploy the application image.
+              apt-get update
+              apt-get install -y docker.io
+              systemctl enable --now docker
+              docker pull ${var.docker_image}
+              docker run -d --name product-store --restart unless-stopped \
+                -p 8080:8080 \
+                -e AWS_REGION="${data.aws_region.current.name}" \
+                -e DYNAMODB_TABLE="${var.dynamodb_table_name}" \
+                ${var.docker_image}
               EOF
 
   tags = { Name = "${var.project_name}-app" }
