@@ -7,3 +7,9 @@ variable "key_name" { type = string }
 variable "instance_type" { type = string }
 variable "dynamodb_table_arn" { type = string }
 variable "dynamodb_table_name" { type = string }
+
+variable "docker_image" {
+  description = "Product Store container image to deploy on EC2."
+  type        = string
+  default     = "ghcr.io/eetemanojkumar-sys/product-store:latest"
+}
