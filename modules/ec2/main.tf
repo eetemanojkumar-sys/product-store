@@ -27,6 +27,13 @@ resource "aws_security_group" "app" {
   }
 
   ingress {
+    description = "HTTP access through standard web port"
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = [var.app_ingress_cidr]
+  }
+  ingress {
     description = "HTTP access to the Product Store application"
     from_port   = 8080
     to_port     = 8080
