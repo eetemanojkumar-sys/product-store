@@ -32,3 +32,8 @@ output "vpc_id" {
   description = "Product Store VPC ID."
   value       = module.vpc.vpc_id
 }
+
+output "dynamodb_users_table_name" {
+  description = "DynamoDB table name used for user accounts."
+  value       = module.dynamodb.users_table_name
+}

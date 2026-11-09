@@ -62,3 +62,9 @@ variable "dynamodb_point_in_time_recovery" {
   type        = bool
   default     = true
 }
+
+variable "dynamodb_users_table_name" {
+  description = "DynamoDB table used for Product Store user accounts."
+  type        = string
+  default     = "product-store-users"
+}

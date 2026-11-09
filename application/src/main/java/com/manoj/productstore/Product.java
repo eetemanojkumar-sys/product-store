@@ -24,7 +24,7 @@ public class Product {
     @NotNull
     @PositiveOrZero
     private Integer quantity;
-    private Instant createdAt;
+    private String createdAt;
 
     @DynamoDbPartitionKey
     @DynamoDbAttribute("productId")
@@ -48,15 +48,15 @@ public class Product {
     public void setQuantity(Integer quantity) { this.quantity = quantity; }
 
     @DynamoDbAttribute("createdAt")
-    public Instant getCreatedAt() { return createdAt; }
-    public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
+    public String getCreatedAt() { return createdAt; }
+    public void setCreatedAt(String createdAt) { this.createdAt = createdAt; }
 
     public void initializeForCreate() {
         if (productId == null || productId.isBlank()) {
             productId = UUID.randomUUID().toString();
         }
         if (createdAt == null) {
-            createdAt = Instant.now();
+            createdAt = Instant.now().toString();
         }
     }
 }
