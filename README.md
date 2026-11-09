@@ -80,7 +80,7 @@ Set `docker_image` in `terraform.tfvars` to that exact image reference. The EC2 
 
 ### Allow public internet access
 
-Set `app_ingress_cidr = "0.0.0.0/0"` in `terraform.tfvars` to make TCP/8080 reachable from the internet. Keep `admin_cidr` restricted to your own public IP (/32); SSH is not opened publicly by this setting.
+Set `app_ingress_cidr = "0.0.0.0/0"` in `terraform.tfvars` to make TCP/80 and TCP/8080 reachable from the internet. Port 80 is the normal browser URL; port 8080 is also available for direct testing. Keep `admin_cidr` restricted to your own public IP (/32); SSH is not opened publicly by this setting.
 
 Then run:
 
