@@ -76,7 +76,7 @@ docker build -t YOUR_DOCKERHUB_USERNAME/product-store:latest ./application
 docker push YOUR_DOCKERHUB_USERNAME/product-store:latest
 ```
 
-Set `docker_image` in `terraform.tfvars` to that exact image reference. The EC2 user-data script pulls and runs it on port 8080.
+Set `docker_image` in `terraform.tfvars` to that exact image reference. The EC2 user-data script pulls the image and publishes the app on host ports 80 and 8080 (both forward to container port 8080).
 
 ### Allow public internet access
 
