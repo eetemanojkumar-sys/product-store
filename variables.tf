@@ -66,5 +66,5 @@ variable "dynamodb_point_in_time_recovery" {
 variable "docker_image" {
   description = "Published Product Store container image for the EC2 instance."
   type        = string
-  default     = "ghcr.io/eetemanojkumar-sys/product-store:latest"
+  default     = "YOUR_DOCKERHUB_USERNAME/product-store:latest"
 }
