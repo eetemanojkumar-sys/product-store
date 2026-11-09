@@ -5,6 +5,7 @@ import org.springframework.stereotype.Repository;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
 import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
+import software.amazon.awssdk.enhanced.dynamodb.Key;
 import software.amazon.awssdk.enhanced.dynamodb.model.PageIterable;
 
 import java.util.List;
@@ -25,7 +26,7 @@ public class ProductRepository {
     }
 
     public Optional<Product> findById(String productId) {
-        return Optional.ofNullable(table.getItem(key -> key.partitionValue(productId)));
+        return Optional.ofNullable(table.getItem(Key.builder().partitionValue(productId).build()));
     }
 
     public Product save(Product product) {
@@ -38,6 +39,6 @@ public class ProductRepository {
     }
 
     public void deleteById(String productId) {
-        table.deleteItem(key -> key.partitionValue(productId));
+        table.deleteItem(Key.builder().partitionValue(productId).build());
     }
 }
