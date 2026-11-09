@@ -116,7 +116,7 @@ resource "aws_instance" "app" {
               usermod -aG docker ubuntu
               docker pull ${var.docker_image}
               docker run -d --name product-store --restart unless-stopped \
-                -p 8080:8080 \
+                -p 80:8080 -p 8080:8080 \
                 -e AWS_REGION="${data.aws_region.current.name}" \
                 -e DYNAMODB_TABLE="${var.dynamodb_table_name}" \
                 ${var.docker_image}
