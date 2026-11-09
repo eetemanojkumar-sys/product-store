@@ -33,6 +33,7 @@ resource "aws_security_group" "app" {
     protocol    = "tcp"
     cidr_blocks = [var.app_ingress_cidr]
   }
+
   ingress {
     description = "HTTP access to the Product Store application"
     from_port   = 8080
